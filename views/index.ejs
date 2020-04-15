@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.9/angular.min.js"></script>
+   </head>
+   <body ng-app="myapp" ng-controller="mycontroller" ng-init="get()">
+   	<div>
+   		<form ng-submit="send(user)">
+   			<label>NAME:</label>
+   			<input type="text" ng-model="user.name">
+   			<br>
+   			<br>
+   			<label>ROLLNO:</label>
+   			<input type="text" ng-model="user.roll">
+   			<br>
+   			<br>
+   			<label>BRANCH:</label>
+   			<input type="text" ng-model="user.branch">
+   			<br>
+   			<br>
+   			<input type="submit">
+   		</form>
+   	</div>
+   	<div>
+   		<table>
+   			<thead>
+   				<tr>
+   					<th>SNO</th>
+   					<th>NAME</th>
+   					<th>ROLLNO</th>
+   					<th>BRANCH</th>
+   					<th>ACTION:</th>
+   			</tr>
+   			</thead>
+             <tbody>
+             	<tr ng-repeat="member in users">
+             		<td><p ng-hide="userhide">{{$index+1|number}}</p></td>
+             		<td><p ng-hide="userhide">{{member.name}}</p>
+             			<input type="text" ng-show="userhide" ng-model="member.name"></td>
+             		<td><p ng-hide="userhide">{{member.roll}}</p>
+             			<input type="text" ng-show="userhide" ng-model="member.roll"></td>
+             		<td><p ng-hide="userhide">{{member.branch}}</p>
+             			<input type="text" ng-show="userhide" ng-model="member.branch"></td>
+             		<td ng-hide="userhide"><button ng-click="remove(member)">REMOVE</button></td>
+             		<td><button ng-hide="userhide" ng-click="userhide=true">EDIT</button></td>
+             		<td><button ng-show="userhide" ng-click="userhide=false;update(member)">UPDATE</button></td>
+
+             </tbody>
+   		</table>
+   	</div>
+   </body>
+   <script type="text/javascript">
+   	var app=angular.module("myapp" ,[])
+   	app.controller("mycontroller",function($scope,postdata,getdata,editdata,removedata){
+   		$scope.users=[]
+   		$scope.user={}
+   		$scope.send=function(inf){
+   			console.log(inf);
+   			$scope.users.push(inf);
+   			postdata.postingdata(inf)
+   			$scope.user={};
+   		}
+   		$scope.remove=function(sno){
+   			$scope.users.splice(sno,1)
+   		}
+   		$scope.get=function(){
+   				getdata.gettingdata().then(function(data){
+   					if(data){
+   						$scope.users=data
+   					}
+   					else{
+   						$scope.users=[];
+   					}
+   				})
+   			}
+   			$scope.update=function(val){
+   				editdata.editingdata(val);
+   			}
+   			$scope.remove=function(val){
+   				removedata.removingdata(val);
+   			}
+   		
+   	});
+   	app.service('postdata',function($http){
+   		return{postingdata:function(value)
+   			{
+   				$http({
+   					method:'post',
+   					url:'/postdata',
+   					data:value
+   				}).then(function(success){
+   					console.log(success)
+   					alert("sucessfully inserted")
+   				},function(err){
+   					console.log(error)
+   					alert(error.data)
+   				})
+   			}
+   		}
+   	})
+   	app.factory('getdata',function($http){
+   		return{gettingdata:function(){
+   			datas=$http({
+   				method:'get',
+   				url:'/getdata'
+   			}).then(function(response){
+   				return response.data;
+   				console.log(response.data)   			
+   			});
+   			return datas;
+   		}
+   	}
+   	})
+   		app.service('editdata',function($http){
+   		return{editingdata:function(value)
+   			{
+   				$http({
+   					method:'post',
+   					url:'/edit',
+   					data:value
+   				}).then(function(success){
+   					console.log(success)
+   					alert("sucessfully edited")
+   				},function(err){
+   					console.log(error)
+   					alert(error.data)
+   				})
+   			}
+   		}
+   	})
+   		app.service('removedata',function($http){
+   		return{removingdata:function(value)
+   			{
+   				$http({
+   					method:'post',
+   					url:'/remove',
+   					data:value
+   				}).then(function(success){
+   					console.log(success)
+   					alert("sucessfully deleted")
+   				},function(err){
+   					console.log(error)
+   					alert(error.data)
+   				})
+   			}
+   		}
+   	})
+   </script>
+</html>
